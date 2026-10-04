@@ -3,7 +3,7 @@ import { LanguageSwitcher, useI18n } from "@/i18n/I18nProvider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Icon, Mark } from "@/components/ui/Icon";
+import { Icon, Mark, SocialLinks } from "@/components/ui/Icon";
 import { useSlidingIndicator } from "@/components/ui/motion";
 import { SessionProvider, useSession } from "@/components/ui/session";
 import { WalletButton } from "@/components/wallet/WalletButton";
@@ -124,6 +124,7 @@ function SiteHeader({ customer }: { customer: boolean }) {
               {t("模拟环境")}
             </span>
           )}
+          <SocialLinks />
           <LanguageSwitcher />
           {!customer && <WalletMenu />}
         </div>
@@ -197,6 +198,7 @@ function Frame({ children }: { children: React.ReactNode }) {
               <span>Private Invoice</span>
             </Link>
             <p>{t("用 USDT / USDC 收款，钱直接进入你自己的隐私钱包。")}</p>
+            <SocialLinks labels />
             {!real && <span className="footer-mode">{t("模拟预览")}</span>}
           </div>
           {FOOTER.map((column) => (

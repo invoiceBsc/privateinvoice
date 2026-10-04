@@ -3,7 +3,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { InvoiceCard } from "@/components/payment/InvoiceCard";
-import { useTilt } from "@/components/ui/motion";
+import { InView, useTilt } from "@/components/ui/motion";
 import { FaqList } from "@/components/docs/Doc";
 
 export default function Home() {
@@ -81,8 +81,22 @@ export default function Home() {
             {t("基于 RAILGUN 零知识证明协议 · BNB Chain")}
           </span>
           <h1>
-            {t("每一笔生意，")} <br />
-            {t("都有一张好账单。")}
+            <span className="line">
+              <span>{t("每一笔生意，")}</span>
+            </span>
+            <span className="line-wrap">
+              <span className="line">
+                <span>{t("都有一张好账单。")}</span>
+              </span>
+              <svg
+                className="scribble"
+                viewBox="0 0 300 14"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path d="M3 9.5C42 4.5 78 3.6 121 6.2c44 2.6 86 3.4 176 -1.6M30 12c52-2.6 118-2.2 214-1.2" />
+              </svg>
+            </span>
           </h1>
           <p className="hero-lead">
             {t(
@@ -179,29 +193,31 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-section process">
+      <InView className="landing-section process">
         <div className="process-intro">
-          <span className="eyebrow">{t("工作流程")}</span>
-          <h2>{t("从开通到收款，四步完成。")}</h2>
+          <div>
+            <span className="eyebrow">{t("工作流程")}</span>
+            <h2>{t("从开通到收款，四步完成。")}</h2>
+          </div>
           <Link className="text-button" href="/docs/getting-started">
             {t("查看快速开始 →")}
           </Link>
         </div>
-        <ol className="process-steps four">
+        <ol className="route">
           {steps.map(([icon, title, text], index) => (
-            <li key={title}>
-              <span className="process-icon">
+            <li key={title} style={{ "--i": index } as React.CSSProperties}>
+              <span className="route-node">
                 <Icon name={icon} size={18} />
               </span>
-              <span className="process-number">0{index + 1}</span>
+              <span className="route-number">0{index + 1}</span>
               <h3>{t(title)}</h3>
               <p>{t(text)}</p>
             </li>
           ))}
         </ol>
-      </section>
+      </InView>
 
-      <section className="landing-section protocol-section">
+      <InView className="landing-section protocol-section">
         <div className="section-intro">
           <span className="eyebrow">{t("协议层")}</span>
           <h2>{t("资金在链上走过的每一步")}</h2>
@@ -214,7 +230,7 @@ export default function Home() {
             {t("阅读一笔付款的链上过程 →")}
           </Link>
         </div>
-        <ol className="protocol-flow">
+        <ol className="flow">
           {[
             [
               "wallet",
@@ -246,20 +262,30 @@ export default function Home() {
               "Groth16 zk-SNARK",
               "商家在浏览器本地生成证明，把资金取回任意地址。",
             ],
-          ].map(([icon, title, code, text]) => (
-            <li key={title}>
-              <span className="protocol-icon">
-                <Icon name={icon} size={17} />
-              </span>
-              <div>
+          ].map(([icon, title, code, text], index, all) => (
+            <li
+              key={title}
+              className={"flow-step s" + (index + 1)}
+              style={{ "--i": index } as React.CSSProperties}
+            >
+              {index > 0 && (
+                <span className="flow-edge" aria-hidden="true">
+                  <code>{index === 1 ? all[0][2] : code}</code>
+                  <i />
+                </span>
+              )}
+              <div className="flow-box">
+                <span className="flow-icon">
+                  <Icon name={icon} size={17} />
+                </span>
                 <strong>{t(title)}</strong>
-                <code>{code}</code>
+                {index === 1 && <code>{code}</code>}
                 <p>{t(text)}</p>
               </div>
             </li>
           ))}
         </ol>
-      </section>
+      </InView>
 
       <section className="landing-section verify-section">
         <div className="verify-terminal" aria-label={t("链上核验示例")}>
@@ -314,11 +340,11 @@ export default function Home() {
       </section>
 
       <section className="landing-section tech-section">
-        <div className="section-intro center">
+        <div className="section-intro">
           <span className="eyebrow">{t("技术栈")}</span>
           <h2>{t("建立在经过检验的密码学之上")}</h2>
         </div>
-        <div className="tech-grid">
+        <dl className="spec-sheet">
           {[
             [
               "zk-SNARK · Groth16",
@@ -343,13 +369,16 @@ export default function Home() {
               "Web Worker Vault",
               "RAILGUN Wallet SDK 运行在隔离线程，密钥不进入页面。",
             ],
-          ].map(([name, text]) => (
-            <div className="tech-chip" key={name}>
-              <code>{name}</code>
-              <p>{t(text)}</p>
+          ].map(([name, text], index) => (
+            <div key={name}>
+              <dt>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <code>{name}</code>
+              </dt>
+              <dd>{t(text)}</dd>
             </div>
           ))}
-        </div>
+        </dl>
         <p className="tech-more">
           <Link className="text-button" href="/docs/railgun">
             {t("RAILGUN 是什么 →")}
@@ -361,16 +390,14 @@ export default function Home() {
       </section>
 
       <section className="landing-section">
-        <div className="section-intro center">
+        <div className="section-intro">
           <span className="eyebrow">{t("功能")}</span>
           <h2>{t("为真实生意设计的细节")}</h2>
         </div>
-        <div className="feature-grid">
+        <div className="feature-list">
           {features.map(([icon, title, text]) => (
-            <div className="feature" key={title}>
-              <span className="process-icon">
-                <Icon name={icon} size={18} />
-              </span>
+            <div className="feature-item" key={title}>
+              <Icon name={icon} size={20} />
               <h3>{t(title)}</h3>
               <p>{t(text)}</p>
             </div>
