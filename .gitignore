@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env
+.env.local
+data/
+logs/
+research/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+*.log
+logs-build.txt
+public/railgun-spike/
+public/vault/
+
+.npmrc

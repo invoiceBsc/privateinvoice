@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RAILGUN isolated browser spike</title>
+    <style>
+      body {
+        font: 15px Arial;
+        max-width: 850px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f6f8f7;
+        color: #182b27;
+      }
+      section {
+        padding: 24px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        margin: 18px 0;
+      }
+      input,
+      textarea,
+      select {
+        display: block;
+        width: 95%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 12px 18px;
+        background: #147c61;
+        color: white;
+        border: 0;
+        border-radius: 6px;
+        margin: 6px;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+      }
+      #error {
+        color: #b33d30;
+      }
+      input[type="checkbox"] {
+        display: inline;
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>RAILGUN browser research spike</h1>
+    <p>
+      Isolated from invoice checkout. All wallet credentials remain in this
+      browser worker. This page can construct unsigned transactions; it cannot
+      approve or broadcast payments.
+    </p>
+    <section>
+      <h2>1. Engine & encrypted wallet</h2>
+      <button id="initialize">Initialize engine</button
+      ><label
+        >Local wallet password (12+ characters)<input
+          id="password"
+          type="password"
+          autocomplete="off" /></label
+      ><button id="generate">Generate recovery phrase</button
+      ><label
+        >Recovery phrase to back up or import<textarea
+          id="mnemonic"
+          autocomplete="off"
+        ></textarea></label
+      ><label
+        ><input id="backup" type="checkbox" />I backed up this phrase
+        securely.</label
+      ><button id="create">Create / import locally</button
+      ><button id="load">Unlock existing wallet</button>
+    </section>
+    <section>
+      <h2>2. BNB network & balance scan</h2>
+      <label
+        >BNB RPC<input
+          id="rpc"
+          value="https://bsc-dataseed.bnbchain.org" /></label
+      ><button id="network">Load network and fees</button
+      ><button id="scan">Scan balance and incoming history</button>
+      <pre id="balances"></pre>
+    </section>
+    <section>
+      <h2>3. Unsigned Shield construction</h2>
+      <label>Recipient 0zk address<input id="recipient" /></label
+      ><label
+        >Token<select id="token">
+          <option value="0x55d398326f99059ff775485246999027b3197955">
+            Binance-Peg USDT
+          </option>
+          <option value="0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d">
+            Binance-Peg USDC
+          </option>
+        </select></label
+      ><label
+        >Gross atomic amount (18 decimals)<input
+          id="amount"
+          value="1000000000000000" /></label
+      ><button id="shield">Construct unsigned Shield</button>
+      <p>
+        Protocol fees are deducted from gross input. This experiment does not
+        quote an invoice net amount and must not be used as checkout.
+      </p>
+    </section>
+    <p id="stage" role="status"></p>
+    <p id="error" role="alert"></p>
+    <pre id="result"></pre>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

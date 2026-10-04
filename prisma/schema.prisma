@@ -1,0 +1,143 @@
+generator client { 
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+enum InvoiceStatus {
+ DRAFT
+ PENDING
+ PAYMENT_SUBMITTED
+ CONFIRMING
+ PAID
+ EXPIRED
+ CANCELLED
+ FAILED
+ REVIEW_REQUIRED
+}
+enum PaymentStatus {
+ CREATED
+ APPROVAL_REQUIRED
+ SUBMITTED
+ CHAIN_CONFIRMED
+ PRIVATE_NOTE_DETECTED
+ FAILED
+}
+enum PaymentMode {
+ PUBLIC_TO_PRIVATE
+ PRIVATE_TO_PRIVATE
+}
+model User {
+ id String @id @default(uuid()) @db.Uuid
+ evmAddress String @unique
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ merchant Merchant?
+ sessions Session[]
+}
+model Merchant {
+ id String @id @default(uuid()) @db.Uuid
+ userId String @unique @db.Uuid
+ user User @relation(fields:[userId],references:[id])
+ displayName String
+ railgunAddress String
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ invoices Invoice[]
+ withdrawals MockWithdrawal[]
+}
+model Invoice {
+ id String @id @default(uuid()) @db.Uuid
+ merchantId String @db.Uuid
+ merchant Merchant @relation(fields:[merchantId],references:[id])
+ publicSlug String @unique
+ invoiceNumber String @unique
+ tokenSymbol String
+ tokenAddress String
+ amountAtomic String
+ decimals Int
+ description String
+ customerLabel String
+ status InvoiceStatus @default(PENDING)
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ paidAt DateTime?
+ attempts PaymentAttempt[]
+ receipts Receipt[]
+ @@index([merchantId,status])
+}
+model PaymentAttempt {
+ id String @id @default(uuid()) @db.Uuid
+ invoiceId String @db.Uuid
+ invoice Invoice @relation(fields:[invoiceId],references:[id])
+ mode PaymentMode @default(PUBLIC_TO_PRIVATE)
+ payerAddress String?
+ chainId Int
+ tokenAddress String
+ amountAtomic String
+ txHash String? @unique
+ provider String
+ providerReference String @unique
+ capabilityHash String
+ status PaymentStatus @default(CREATED)
+ balanceState String @default("pending")
+ createdAt DateTime @default(now())
+ confirmedAt DateTime?
+ failureCode String?
+ failureMessage String?
+ // RAILGUN Shield built by the server. The ephemeral shield private key is never stored;
+ // these public values are enough to recognise and verify the on-chain commitment.
+ grossAtomic String?
+ shieldPublicKey String? @unique
+ notePublicKey String?
+ encryptedBundle Json?
+ createdBlock Int?
+ blockNumber Int?
+ receipt Receipt?
+ @@index([invoiceId,status])
+}
+model Receipt {
+ id String @id @default(uuid()) @db.Uuid
+ invoiceId String @unique @db.Uuid
+ invoice Invoice @relation(fields:[invoiceId],references:[id])
+ paymentAttemptId String @unique @db.Uuid
+ paymentAttempt PaymentAttempt @relation(fields:[paymentAttemptId],references:[id])
+ receiptNumber String @unique
+ issuedAt DateTime @default(now())
+ payload Json
+ payloadHash String
+ signature String
+ publicKey String
+ signatureAlgorithm String @default("Ed25519")
+}
+model AuthNonce {
+ id String @id
+ address String
+ message String
+ expiresAt DateTime
+ consumedAt DateTime?
+}
+model Session {
+ id String @id
+ userId String @db.Uuid
+ user User @relation(fields:[userId],references:[id])
+ expiresAt DateTime
+}
+model RateLimit {
+ id String @id
+ count Int @default(1)
+ resetAt DateTime
+}
+
+model MockWithdrawal {
+ id String @id @default(uuid()) @db.Uuid
+ merchantId String @db.Uuid
+ merchant Merchant @relation(fields:[merchantId],references:[id])
+ tokenAddress String
+ amountAtomic String
+ destination String
+ txHash String @unique
+ createdAt DateTime @default(now())
+}
